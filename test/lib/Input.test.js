@@ -35,12 +35,14 @@ describe("Input", () => {
   describe("stream", () => {
     describe("from array", () => {
       beforeEach(async () => {
-        const inputStream = Readable.from(JSON.stringify([{ message: "Hello One" }, { message: "Hello Two" }]));
+        jest.spyOn(process, "openStdin").mockImplementation(() => {
+          return Readable.from(JSON.stringify([{ message: "Hello One" }, { message: "Hello Two" }]));
+        });
 
         const result = await new Promise((resolve, reject) => {
           const list = [];
 
-          const stream = inputStream.pipe(Input.stream());
+          const stream = Input.stream();
           stream.on("data", data => list.push(data));
           stream.on("error", error => reject(error));
           stream.on("end", () => resolve(list));
@@ -57,14 +59,14 @@ describe("Input", () => {
 
   describe("from nested object", () => {
     beforeEach(async () => {
-      const inputStream = Readable.from(
-        JSON.stringify({ response: [{ message: "Hello One" }, { message: "Hello Two" }] })
-      );
+      jest.spyOn(process, "openStdin").mockImplementation(() => {
+        return Readable.from(JSON.stringify({ response: [{ message: "Hello One" }, { message: "Hello Two" }] }));
+      });
 
       const result = await new Promise((resolve, reject) => {
         const list = [];
 
-        const stream = inputStream.pipe(Input.stream("$.response"));
+        const stream = Input.stream("$.response");
         stream.on("data", data => list.push(data));
         stream.on("error", error => reject(error));
         stream.on("end", () => resolve(list));
@@ -80,15 +82,13 @@ describe("Input", () => {
 
   describe("from multiple objects", () => {
     beforeEach(async () => {
-      const inputStream = Readable.from([
-        JSON.stringify({ message: "Hello One" }),
-        JSON.stringify({ message: "Hello Two" })
-      ]);
-
+      jest.spyOn(process, "openStdin").mockImplementation(() => {
+        return Readable.from([JSON.stringify({ message: "Hello One" }), JSON.stringify({ message: "Hello Two" })]);
+      });
       content = await new Promise((resolve, reject) => {
         const list = [];
 
-        const stream = inputStream.pipe(Input.stream());
+        const stream = Input.stream();
         stream.on("data", data => list.push(data));
         stream.on("error", error => reject(error));
         stream.on("end", () => resolve(list));
