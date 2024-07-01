@@ -1,6 +1,6 @@
 {
   "name": "@aux4/input",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI Input Parser",
   "main": "index.js",
   "scripts": {
